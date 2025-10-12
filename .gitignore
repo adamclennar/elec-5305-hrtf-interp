@@ -1,5 +1,5 @@
 data/.*sofadata/*.sofa
 .venv/
-out/
+#out/
 src/__pycache__/
 *.pyc
