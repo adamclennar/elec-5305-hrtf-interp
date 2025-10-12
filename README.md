@@ -7,8 +7,13 @@ Accurate spatial audio reproduction through headphones depends heavily on the ch
 
 Goals:
 	1. Implement an offline HRIR spatialiser that loads SOFA-format datasets and renders binaural audio from mono stems.
+	
 	2. Quantify interaural time and level differences (ITD/ILD) versus azimuth for multiple HRIR datasets.
+	
 	3. Conduct subjective listening tests to estimate perceived localisation error and externalisation quality.
+	
 	4. Compare and visualise objective and subjective results to identify datasets offering superior spatial accuracy for headphone playback.
+	
 	5. Publish all code, analysis scripts, and result plots in an open GitHub repository for reproducibility.
+	
 
