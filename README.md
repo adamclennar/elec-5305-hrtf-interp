@@ -19,3 +19,18 @@ Goals:
 	5. Publish all code, analysis scripts, and result plots in an open GitHub repository for reproducibility.
 	
 
+
+# Evaluating HRIR Datasets for Headphone Spatialisation
+
+This project develops a Python-based toolchain to (1) render mono audio to binaural via HRIR convolution (SOFA files) and (2) analyse **interaural time difference (ITD)** and **interaural level difference (ILD)** versus azimuth for different datasets.
+
+### What’s here now
+- **Renderer:** `src/render.py` — mono→binaural (FFT convolution), simple distance model.
+- **Analysis:** `analysis/itd_ild_analysis.py` — ITD/ILD plots + dataset alignment + Δ(ITD/ILD) with MAE/RMSE.
+- **Preliminary results:** KEMAR 5° vs 0.5° (upsampled) at 0° elevation — curves overlap at matched angles, as expected.
+
+### Install
+```bash
+python -m venv .venv
+source .venv/bin/activate    
+pip install -r requirements.txt

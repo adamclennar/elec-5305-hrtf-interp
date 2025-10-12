@@ -1,1 +1,5 @@
-data/.*sofa
+data/.*sofadata/*.sofa
+.venv/
+out/
+src/__pycache__/
+*.pyc
