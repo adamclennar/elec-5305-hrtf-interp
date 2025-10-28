@@ -1,6 +1,10 @@
+cat > .gitignore <<'EOF'
+# Python env & cache
 .venv/
 __pycache__/
 *.pyc
+
+# Large or generated data (do NOT commit)
 data/
 data_npz/
 out/
@@ -8,15 +12,7 @@ results/audio/
 *.npz
 *.sofa
 *.wav
+
+# OS junk
 .DS_Store
-.venv/
-__pycache__/
-*.pyc
-data/
-data_npz/
-out/
-results/audio/
-*.npz
-*.sofa
-*.wav
-.DS_Store
+EOF
