@@ -16,3 +16,5 @@ results/audio/
 # OS junk
 .DS_Store
 EOF
+examples/
+out/
