@@ -1,5 +1,11 @@
-data/.*sofadata/*.sofa
 .venv/
-#out/
-src/__pycache__/
+__pycache__/
 *.pyc
+data/
+data_npz/
+out/
+results/audio/
+*.npz
+*.sofa
+*.wav
+.DS_Store
