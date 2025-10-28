@@ -34,3 +34,31 @@ This project develops a Python-based toolchain to (1) render mono audio to binau
 python -m venv .venv
 source .venv/bin/activate    
 pip install -r requirements.txt
+
+
+# handy commands !!
+# Preprocess
+PYTHONPATH=. python -c "from src.data_prep import bulk_sofa_to_npz; \
+bulk_sofa_to_npz('splits/test.txt','data_npz/test')"
+
+# Baselines evaluation (start with one subject)
+PYTHONPATH=. python analysis/eval_methods.py \
+  --subject data_npz/test/subj_000.npz \
+  --sparsity 30 \
+  --methods NN RBF \
+  --outdir results/interp
+
+# CNN training (after baselines)
+PYTHONPATH=. python analysis/train_cnn.py \
+  --train_glob 'data_npz/train/*.npz' \
+  --val_glob   'data_npz/val/*.npz' \
+  --epochs 30 --batch 16 --lr 1e-3 --tv 1e-3 \
+  --save results/cnn_ckpt.pt
+
+# Full evaluation
+PYTHONPATH=. python analysis/eval_methods.py \
+  --test_glob 'data_npz/test/*.npz' \
+  --sparsity 30 15 10 \
+  --methods NN RBF CNN \
+  --cnn_ckpt results/cnn_ckpt.pt \
+  --outdir results/interp

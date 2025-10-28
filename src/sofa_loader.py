@@ -15,20 +15,14 @@ _backend = None
 try:
     import pysofaconventions as _sofa
     _backend = "pysofaconventions"
-except Exception:
-    try:
-        import pysofa as _sofa
-        _backend = "pysofa"
-    except Exception as e:
-        raise ImportError(
-            "No SOFA reader found. Install one of: 'pysofaconventions' or 'pysofa'."
-        ) from e
+
+except Exception as e:
+    raise ImportError(
+        "No SOFA reader found. Install one of: 'pysofaconventions' or 'pysofa'."
+    ) from e
 
 def _open_sofa(path):
-    if _backend == "pysofaconventions":
-        return _sofa.SOFAFile(path, "r")
-    else:  # pysofa
-        return _sofa.SOFAFile(path, "r")
+    return _sofa.SOFAFile(path, "r")
 
 def _get_hrir(s):
     # Both libs provide getDataIR()
