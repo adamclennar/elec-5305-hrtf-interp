@@ -1,93 +1,79 @@
-ELEC5305 — HRTF Interpolation for Sparse Spatial Mixing
+ELEC5305 — HRTF Interpolation from Sparse Directions
 
-This repo explores how well different interpolation strategies reconstruct missing HRTF directions from sparse measurements. We compare a simple Nearest-Neighbour (NN) baseline against a periodic spline (smooth circular interpolation). Code produces quantitative metrics and QC plots and is structured so a CNN (& possibly spherical CNN) model can be used later.
+This project evaluates how well different interpolation strategies reconstruct missing HRTF directions for headphone spatial mixing from sparse azimuth samples on the horizontal plane (elev ≈ 0°). We currently compare a simple Nearest-Neighbour (NN) baseline versus a smooth periodic spline (circular cubic spline). A CNN model will be added later.
 
-Project aim
+Goals
 
-Reconstruct missing HRTF directions from sparse measurements and compare NN vs a smooth periodic spline (and later a CNN) using:
+Reconstruct dense azimuth HRTFs from sparse measurements.
 
-Spectral error: Log-Spectral Distance (LSD) per ear (dB)
+Compare methods using:
 
-Timing error: ITD MAE (ms)
+LSD (Log-Spectral Distance) per ear (dB, band-limited),
 
-Level error: band-averaged ILD MAE (dB)
+ITD MAE (ms),
 
-(Planned) Motion smoothness during panning
+ILD MAE (dB, band-average).
 
-What’s done so far
+(Planned) Evaluate motion smoothness during panning and provide A/B demo audio.
 
-Implemented preprocessing:
+What’s implemented
 
-Load SOFA HRIRs; select an elevation band (e.g., 0°±5°)
+Preprocessing
 
-Estimate ITD (phase-slope primary, GCC fallback; consistent sign)
+Load SOFA, select elevation band (default: 0° ± 5°).
 
-Time-align ears (remove ±ITD/2 via fractional delay)
+Estimate ITD (phase-slope primary, GCC-PHAT fallback), consistent sign: + = Right later than Left.
 
-Compute per-ear spectra (dB) on fixed frequency grid
+Time-align ears (remove ±ITD/2 with fractional delay).
 
-Save compact features to .npz for fast training/eval
+Compute fixed-grid magnitude spectra (dB) per ear.
 
-QC scripts:
+Save compact features to .npz for fast experiments.
 
-ITD vs azimuth, magnitude heatmaps, ILD vs azimuth, angle coverage
+QC & visualisation: ITD vs azimuth, ILD vs azimuth, magnitude heatmaps, angle coverage.
 
-Baselines:
+Baselines & metrics
 
-NN and Periodic spline interpolation along azimuth
+NN along azimuth (circular).
 
-Metrics: LSD (dB RMSE), ITD MAE (ms), ILD MAE (dB)
+Periodic spline (circular cubic spline) for per-freq magnitudes and for ITD.
 
-Aggregation:
+Metrics: LSD_L, LSD_R, ITD_MAE, ILD_MAE; CSV + figures.
 
-Mean ± SD across subjects and sparsities, with plots
+Aggregation: mean ± SD across subjects and sparsities; summary plots.
 
 Repository layout
 analysis/
-  qc_plots.py            # ITD/ILD/heatmaps/coverage for a single .npz
-  check_itd_vs_az.py     # (optional) focused ITD vs azimuth plot
-  eval_methods.py        # run NN / spline baselines + save metrics
-  aggregate_metrics.py   # aggregate metrics across subjects
-data/                    # (you put .sofa files here, e.g., data/NH43/*.sofa)
-data_npz/                # preprocessed feature files (.npz)
-results/                 # metrics CSVs and figures
-src/
-  sofa_loader.py         # SOFA reader + elevation selection
-  signal_tools.py        # ITD, frac-delay, spectra, helpers
-  data_prep.py           # SOFA -> .npz (single + bulk)
+  qc_plots.py            # QC for a single .npz (ITD/ILD/heatmaps/coverage)
+  check_itd_vs_az.py     # Focused ITD vs azimuth plot
+  eval_methods.py        # Run NN / spline baselines + metrics
+  aggregate_metrics.py   # Aggregate metrics across subjects
+results/
+  interp/                # metrics CSV + aggregate PNGs
+  qc/                    # subject QC PNGs
 splits/
-  train.txt, val.txt, test.txt   # newline-separated paths to .sofa files
+  train.txt  val.txt  test.txt   # newline-separated paths to .sofa files
+src/
+  sofa_loader.py         # SOFA I/O + elevation selection
+  signal_tools.py        # ITD, fractional delay, spectra, helpers
+  data_prep.py           # SOFA → .npz (single + bulk)
 README.md
 requirements.txt
 
 
-Naming convention for outputs (no subfolders):
-data_npz/test/NH43__hrtf_M_hrtf B__elev0.npz
-(subject inferred from the parent directory name like NH43)
-
-Setup
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-
-Place SOFA files under subject-named folders, e.g.
-
-data/NH43/hrtf_M_hrtf B.sofa
-data/NH5/hrtf_M_hrtf B.sofa
-...
-
-
-Then list them (absolute or relative paths) in splits/train.txt, splits/val.txt, splits/test.txt — one path per line.
+Not tracked (see .gitignore): data/ (SOFA), data_npz/ (features), out/, audio WAVs, and any large artifacts.
 
 Reproduce
 
 End-to-end: preprocess → QC → evaluate baselines → aggregate results.
+Place your SOFA files under data/<SUBJECT>/… (e.g., data/NH43/hrtf_M_hrtf B.sofa) and list them in splits/*.txt.
 
-# 0) Activate env
+# 0) Environment
+python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
 
-# 1) Preprocess SOFA -> NPZ (elevation 0° ± 5°)
+# 1) Preprocess SOFA → NPZ (elev 0° ± 5°)
 PYTHONPATH=. python - <<'PY'
 from src.data_prep import bulk_sofa_to_npz
 bulk_sofa_to_npz('splits/train.txt','data_npz/train', elev=0, tol=5, nfft=2048)
@@ -95,17 +81,17 @@ bulk_sofa_to_npz('splits/val.txt',  'data_npz/val',   elev=0, tol=5, nfft=2048)
 bulk_sofa_to_npz('splits/test.txt', 'data_npz/test',  elev=0, tol=5, nfft=2048)
 PY
 
-# 2) QC a few subjects (adjust filename)
+# 2) QC (pick one subject NPZ)
 PYTHONPATH=. python analysis/qc_plots.py \
-  --npz data_npz/test/NH43__hrtf_M_hrtf B__elev0.npz \
+  --npz data_npz/test/<SUBJECT>__<sofa-base>__elev0.npz \
   --outdir results/qc
 
-# (Optional) focused ITD vs azimuth
+# (Optional) Focused ITD vs azimuth
 PYTHONPATH=. python analysis/check_itd_vs_az.py \
-  --npz data_npz/test/NH43__hrtf_M_hrtf B__elev0.npz \
-  --out results/qc/NH43_itd_vs_az.png
+  --npz data_npz/test/<SUBJECT>__<sofa-base>__elev0.npz \
+  --out results/qc/<SUBJECT>_itd_vs_az.png
 
-# 3) Evaluate baselines (NN and periodic spline) at multiple sparsities
+# 3) Evaluate baselines at multiple sparsities (e.g., 30°, 15°, 10°)
 PYTHONPATH=. python analysis/eval_methods.py \
   --test_glob 'data_npz/test/*.npz' \
   --sparsity 30 15 10 \
@@ -118,39 +104,40 @@ PYTHONPATH=. python analysis/aggregate_metrics.py \
   --outdir results/interp
 
 
-Outputs you should see
+Outputs
 
-results/qc/*_itd_vs_az.png, *_mag_heatmap_*.png, *_ild_vs_az.png, *_angle_coverage.png
+Per-subject QC PNGs under results/qc/.
 
-results/interp/interp_metrics.csv (per-subject rows)
+Per-subject metrics rows in results/interp/interp_metrics.csv.
 
-results/interp/interp_metrics_summary.csv (mean ± SD by method/sparsity)
+Aggregate summary CSV + figures:
 
-results/interp/agg_LSD_avg.png, agg_ITD_MAE.png, agg_ILD_MAE.png
+results/interp/interp_metrics_summary.csv
+
+results/interp/agg_LSD_avg.png
+
+results/interp/agg_ITD_MAE.png
+
+results/interp/agg_ILD_MAE.png
+
+Current snapshot (example)
+
+On NH43 at 30° sampling, periodic spline vs NN:
+
+LSD(avg L/R): ↓ ~17–20%
+
+ITD MAE: 0.067 → 0.010 ms
+
+ILD MAE: 1.41 → 1.05 dB
+
+(See results/interp/*.png for the exact figures.)
 
 Notes & assumptions
 
-ITD sign convention: positive = Right ear later than Left. The pipeline enforces this; if you bring external NPZs, keep it consistent.
+ITD sign convention: positive = Right ear later than Left (enforced in preprocessing).
 
-ILD band: 1–8 kHz band-average (adjust in scripts if needed).
+ILD band: default 1–8 kHz band-average for ILD plots/metrics.
 
-Spline method: “RBF” flag maps to a periodic cubic spline across azimuth (robust, no hyper-params). True RBF can be added later.
+Angle wrap: azimuths are wrapped to [−180, 180) and sorted for interpolation.
 
-Elevation slice: default elev=0, tol=5. Tighten to tol=3 if needed.
-
-Roadmap
-
-Add CNN interpolator (input = sparse azimuths, output = dense mags + ITD).
-
-Add motion smoothness metric + render A/B panning WAVs.
-
-Compare across sparsities and subjects; ablate ITD clean-up options.
-
-Data policy / versioning
-
-Keep the repo lean. Large artifacts (*.sofa, *.npz, *.wav) are ignored by default.
-If you must include sample .npz, use Git LFS:
-
-git lfs install
-git lfs track "*.npz" "*.sofa" "*.wav"
-git add .gitattributes
+Periodic spline: “RBF” flag maps to a circular cubic spline; true RBF can be added later.
