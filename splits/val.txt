@@ -1,0 +1,10 @@
+data/NH30/hrtf_M_hrtf B.sofa
+data/NH61/hrtf_M_hrtf B.sofa
+data/NH93/hrtf_M_hrtf B.sofa
+data/NH123/hrtf_M_hrtf B.sofa
+data/NH2/hrtf_M_hrtf B.sofa
+data/NH104/hrtf_M_hrtf B.sofa
+data/NH22/hrtf_M_hrtf B.sofa
+data/NH13/hrtf_M_hrtf B.sofa
+data/NH115/hrtf_M_hrtf B.sofa
+data/NH25/hrtf_M_hrtf B.sofa
