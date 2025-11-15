@@ -39,26 +39,27 @@ This project uses the **ARI HRTF database** in SOFA format.
             hrtf_M_hrtf B.sofa
          ...
 
-2. Environment Setup
+## 2. Environment Setup
 2.1. Clone and create virtual environment
-bash
-Copy code
+```bash
 git clone <your-github-url> elec5305-hrtf-interp
 cd elec5305-hrtf-interp
 
 python -m venv .venv
 source .venv/bin/activate    # on Windows: .venv\Scripts\activate
+```
 2.2. Install dependencies
-bash
-Copy code
+```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+```
+
 Typical dependencies include: numpy, scipy, matplotlib, sofar, soundfile, torch, etc.
 Everything needed should already be captured in requirements.txt.
 
-3. Preprocessing: SOFA → NPZ
+## 3. Preprocessing: SOFA → NPZ
 All experiments run on preprocessed .npz files that cache:
-
+```
 az_deg – azimuths (deg)
 
 freqs_hz – frequency grid (Hz)
@@ -66,7 +67,7 @@ freqs_hz – frequency grid (Hz)
 magL_db[A,F], magR_db[A,F] – magnitude spectra (dB)
 
 itd_ms[A] – interaural time difference (ms)
-
+```
 The pipeline:
 
 Select an elevation band (e.g. 0° ± 5°).
@@ -84,41 +85,40 @@ Save compact .npz with the fields above.
 3.1. Example: convert all ARI subjects to NPZ (elev = 0°)
 From the repo root:
 
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/sofa_to_npz.py \
   --root data/ARI \
   --out data_npz/test \
   --elev 0
+```
 This will produce:
 
-text
-Copy code
+```text
 data_npz/
   test/
     NH43__hrtf_M_hrtf_B__elev0.npz
     NH159__hrtf_M_hrtf_B__elev0.npz
     ...
+```
 You can also create separate train/ and val/ splits (for CNN / global NF training) by running sofa_to_npz.py with different --out directories or using file lists.
 
-4. Running Interpolation Experiments
+## 4. Running Interpolation Experiments
 The main evaluation entry point is:
 
-bash
-Copy code
+```bash
 analysis/eval_methods.py
+```
 This script compares methods across subjects and sparsities, and writes metrics + plots.
 
 4.1. Single-subject evaluation (e.g. NH43, 15° and 30°)
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/eval_methods.py \
   --subject data_npz/test/NH43__hrtf_M_hrtf_B__elev0.npz \
   --sparsity 30 15 \
   --methods NN RBF SH NEURAL_FIELD_SMOOTH \
   --outdir results/interp_NH43
 --sparsity = keep every N degrees (i.e. 30° and 15°).
-
+```
 --methods can include any subset of:
 
 NN (nearest neighbour)
@@ -148,16 +148,16 @@ itd_MAE_ms, ild_MAE_db
 *.png per run – quick LSD bar plots.
 
 4.2. All subjects under a glob
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/eval_methods.py \
   --test_glob 'data_npz/test/*.npz' \
   --sparsity 30 15 \
   --methods NN RBF SH NEURAL_FIELD_SMOOTH \
   --outdir results/interp_ari
+```
 You can then post-process results/interp_ari/interp_metrics.csv with the provided plotting script (e.g. boxplots, mean LSD vs method) or your own analysis.
 
-5. Neural Field Training (Optional)
+## 5. Neural Field Training (Optional)
 There are two NF modes in this project:
 
 Per-subject Residual Neural Field – trained on-the-fly inside predict_neural_field_residual_banded when you call eval_methods.py with NEURAL_FIELD / NEURAL_FIELD_SMOOTH.
@@ -172,23 +172,23 @@ Global NF (optional, if implemented) – trained once across many subjects, then
 
 Example (if you have a global NF training script):
 
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/train_neural_field_global.py \
   --train_glob 'data_npz/train/*.npz' \
   --out_ckpt 'results/neural_field/global_nf_residual_banded.pt'
+```
 Then evaluate with:
 
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/eval_methods.py \
   --test_glob 'data_npz/test/*.npz' \
   --sparsity 30 15 \
   --methods NF_GLOBAL \
   --outdir results/interp_ari_nf_global
+```
 If you only care about per-subject NF and NF-smooth, using NEURAL_FIELD and NEURAL_FIELD_SMOOTH in eval_methods.py is enough.
 
-6. Listening Demos
+## 6. Listening Demos
 To support the project video, the repo includes two demo scripts in demo_scripts/:
 
 make_abc_demo.py – A/B/C comparison at one azimuth
@@ -198,22 +198,22 @@ make_rotation_demo.py – rotating source demo over azimuth
 6.1. Prepare demo audio sources
 Place a mono WAV file for speech / noise into demo_sources/, e.g.:
 
-text
-Copy code
+```text
 demo_sources/
   speech_mono.wav        # 48 kHz, mono
   pinknoise_mono.wav     # 48 kHz, mono
+```
 The scripts assume the input is 48 kHz; if not, resample beforehand.
 
 6.2. A/B/C demo (True vs RBF vs NF-smooth)
-bash
-Copy code
+```bash
 PYTHONPATH=. python demo_scripts/make_abc_demo.py \
   --npz data_npz/test/NH43__hrtf_M_hrtf_B__elev0.npz \
   --audio_in demo_sources/speech_mono.wav \
   --az_hidden 20 \
   --step_deg 30 \
   --outdir demo_audio
+```
 This produces:
 
 demo_audio/demo_true.wav – ground-truth HRTF at ~20°
@@ -225,8 +225,7 @@ demo_audio/demo_nf_smooth.wav – NF-smoothed interpolation at 20°
 These are ideal for an A/B/C listening comparison in your video.
 
 6.3. Rotating source demo
-bash
-Copy code
+```bash
 PYTHONPATH=. python demo_scripts/make_rotation_demo.py \
   --npz data_npz/test/NH43__hrtf_M_hrtf_B__elev0.npz \
   --audio_in demo_sources/pinknoise_mono.wav \
@@ -234,10 +233,10 @@ PYTHONPATH=. python demo_scripts/make_rotation_demo.py \
   --step_deg 30 \
   --segment_sec 0.3 \
   --out demo_audio/rotation_nf_smooth.wav
+```
 You can also generate NN and RBF versions:
 
-bash
-Copy code
+```bash
 # NN rotation
 PYTHONPATH=. python demo_scripts/make_rotation_demo.py \
   --npz data_npz/test/NH43__hrtf_M_hrtf_B__elev0.npz \
@@ -252,13 +251,12 @@ PYTHONPATH=. python demo_scripts/make_rotation_demo.py \
   --method rbf \
   --step_deg 30 \
   --out demo_audio/rotation_rbf.wav
-In the video, you can visualise the azimuth path (e.g. -80° → +80° → -80°) while playing these files.
+```
 
-7. Repository Structure (Summary)
+## 7. Repository Structure (Summary)
 A typical layout:
 
-text
-Copy code
+```text
 elec5305-hrtf-interp/
   analysis/
     sofa_to_npz.py             # SOFA → NPZ preprocessing
@@ -291,6 +289,7 @@ results/
 .venv/
 __pycache__/
 *.pyc
+```
 8. Reproducing the Main Results
 To roughly reproduce the main comparison in the report:
 
@@ -298,13 +297,13 @@ Preprocess ARI subjects to NPZ (analysis/sofa_to_npz.py).
 
 Run eval_methods.py over all test subjects with:
 
-bash
-Copy code
+```bash
 PYTHONPATH=. python analysis/eval_methods.py \
   --test_glob 'data_npz/test/*.npz' \
   --sparsity 30 15 \
   --methods NN RBF SH NEURAL_FIELD_SMOOTH \
   --outdir results/interp_ari
+```
 Use your plotting script (or a Jupyter notebook) to:
 
 Compute mean LSD at 15° and 30° per method.
