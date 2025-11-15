@@ -1,3 +1,0 @@
-subject,method,sparsity_deg,lsd_L_db,lsd_R_db,lsd_L_band_db,lsd_R_band_db,itd_MAE_ms,ild_MAE_db,png
-NH43__hrtf_M_hrtf_B__elev0,NN,30,5.512127208412555,5.755777790259393,5.053413328648356,5.253962536300509,0.06715637149911437,1.4063340171768293,results/interp/NH43__hrtf_M_hrtf_B__elev0__NN__30deg_metrics.png
-NH43__hrtf_M_hrtf_B__elev0,RBF,30,4.56543661467008,4.593274389940295,4.16027284888802,4.172122014056474,0.010056590223261367,1.0473688874518263,results/interp/NH43__hrtf_M_hrtf_B__elev0__RBF__30deg_metrics.png
