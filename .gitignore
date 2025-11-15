@@ -8,10 +8,20 @@ __pycache__/
 data/
 data_npz/
 out/
-results/audio/
+*.wav
+results/
+*.pt
+*.wav
 *.npz
 *.sofa
-*.wav
+
+analysis/QC_plots.py
+analysis/test.py
+analysis/check_itd_vs_az.py
+src/models/cnn_interp.py
+src/cnn_dataset.py
+src/train_cnn.py
+src/train_neural_field.py
 
 # OS junk
 .DS_Store
