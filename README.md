@@ -33,13 +33,11 @@ This project uses the **ARI HRTF database** in SOFA format.
    ```text
    elec5305-project/
      data/
-       ARI/
          NH43/
-           NH43.sofa
+           hrtf_M_hrtf B.sofa
          NH159/
-           NH159.sofa
+            hrtf_M_hrtf B.sofa
          ...
-The exact structure doesn’t need to be ARI-specific; the preprocessing script just walks the tree under --root.
 
 2. Environment Setup
 2.1. Clone and create virtual environment
