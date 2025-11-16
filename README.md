@@ -16,7 +16,10 @@ All methods are evaluated under matched sparse grids (e.g. **15°** and **30°**
 - Interaural Time Difference (**ITD**) MAE  
 - Interaural Level Difference (**ILD**) MAE  
 
-The repo also includes **listening demo scripts** for A/B/C comparisons and rotating-source examples suitable for project videos.
+The repo also includes **listening demo scripts** for A/B/C comparisons and rotating-source examples 
+
+Here is the link to my project video:
+https://drive.google.com/file/d/1qjJz82aGHaMhE4z7q9v9QbgRd1awk5z5/view?usp=sharing 
 
 ---
 
