@@ -3,5 +3,5 @@ scipy
 matplotlib
 pysofaconventions
 soundfile
-
+torch
 #environment is .venv
